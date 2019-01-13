@@ -7,4 +7,4 @@ See original [documentation](https://github.com/dvhdr/launchpad-pro).
 
 ## Usage
 
-Install development platform `pio platform install launchpadpro` and create project `pio init -b launchpadpro`.
+Install development platform `pio platform install https://github.com/phrolov/platform-launchpadpro.git` and create project `pio init -b launchpadpro`.
