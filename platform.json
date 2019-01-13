@@ -1,0 +1,22 @@
+{
+    "name": "launchpadpro",
+    "title": "Launchpad Pro",
+    "description": "Open source firmware for the Launchpad Pro grid controller",
+    "url": "https://github.com/dvhdr/launchpad-pro",
+    "homepage": "",
+    "license": "Apache-2.0",
+    "engines": {
+        "platformio": "^3.0.0"
+    },
+    "version": "0.0.1",
+    "packageRepositories": [
+        "https://dl.bintray.com/platformio/dl-packages/manifest.json",
+        "https://dl.platformio.org/packages/manifest.json"
+    ],
+    "packages": {
+        "toolchain-gccarmnoneeabi": {
+            "type": "toolchain",
+            "version": ">=1.60301.0"
+        }
+    }
+}

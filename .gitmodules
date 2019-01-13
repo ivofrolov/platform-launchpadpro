@@ -1,0 +1,3 @@
+[submodule "tools/hextosyx/libintelhex"]
+	path = tools/hextosyx/libintelhex
+	url = https://github.com/dvhdr/libintelhex.git
