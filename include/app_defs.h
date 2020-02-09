@@ -1,6 +1,6 @@
 
-#ifndef APP_TYPES_H
-#define APP_TYPES_H
+#ifndef LAUNCHPAD_APP_TYPES_H
+#define LAUNCHPAD_APP_TYPES_H
 
 /******************************************************************************
  
