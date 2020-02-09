@@ -44,7 +44,7 @@ env.Replace(
         '-Wl,--gc-sections'
     ],
     PROGNAME='launchpad_pro',
-    HEXTOSYX=join(PLATFORM_DIR, 'bin/hextosyx')
+    HEXTOSYX=join(PLATFORM_DIR, 'tools/hextosyx.py')
 )
 
 env.Append(
@@ -70,6 +70,7 @@ env.Append(
         ),
         HexToSyx=Builder(
             action=env.VerboseAction(' '.join([
+                'python3',
                 '${HEXTOSYX}',
                 '$SOURCES',
                 '$TARGET'

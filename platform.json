@@ -2,11 +2,15 @@
     "name": "launchpadpro",
     "title": "Launchpad Pro",
     "description": "Open source firmware for the Launchpad Pro grid controller",
-    "url": "https://github.com/dvhdr/launchpad-pro",
-    "homepage": "",
+    "url": "https://novationmusic.com",
+    "homepage": "https://github.com/ivofrolov/platform-launchpadpro",
     "license": "Apache-2.0",
     "engines": {
         "platformio": "^3.0.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ivofrolov/platform-launchpadpro.git"
     },
     "version": "0.0.1",
     "packageRepositories": [
@@ -18,5 +22,8 @@
             "type": "toolchain",
             "version": ">=1.60301.0"
         }
+    },
+    "pythonPackages": {
+        "IntelHex": "2.2.1"
     }
 }
