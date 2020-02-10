@@ -44,7 +44,8 @@ env.Replace(
         '-Wl,--gc-sections'
     ],
     PROGNAME='launchpad_pro',
-    HEXTOSYX=join(PLATFORM_DIR, 'tools/hextosyx.py')
+    HEXTOSYX=join(PLATFORM_DIR, 'tools/hextosyx.py'),
+    SENDSYSEX=join(PLATFORM_DIR, 'tools/sendsysex.py')
 )
 
 env.Append(
@@ -71,7 +72,7 @@ env.Append(
         HexToSyx=Builder(
             action=env.VerboseAction(' '.join([
                 'python3',
-                '${HEXTOSYX}',
+                '$HEXTOSYX',
                 '$SOURCES',
                 '$TARGET'
             ]), 'Building $TARGET'),
@@ -90,5 +91,19 @@ else:
     target_syx = env.HexToSyx(join('$BUILD_DIR', '${PROGNAME}'), target_hex)
 
 AlwaysBuild(env.Alias('nobuild', target_syx))
+
+env.Replace(
+    UPLOAD_PORT='"Launchpad Pro"'
+)
+
+upload = env.VerboseAction(' '.join([
+    'python3',
+    '$SENDSYSEX',
+    '-p',
+    '$UPLOAD_PORT',
+    '$SOURCE'
+]), 'Uploading $SOURCE')
+
+AlwaysBuild(env.Alias('upload', target_syx, upload))
 
 Default(target_syx)

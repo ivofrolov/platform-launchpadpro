@@ -24,6 +24,7 @@
         }
     },
     "pythonPackages": {
-        "IntelHex": "2.2.1"
+        "IntelHex": "2.2.1",
+        "python-rtmidi": "1.4.0"
     }
 }

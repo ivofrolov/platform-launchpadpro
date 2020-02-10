@@ -33,7 +33,9 @@ def block(ihex: IntelHex, offset: int, byte_width: int) -> bytes:
     return payload[:(1 + (byte_width * 8) // 7)]
 
 
-def convert_ihex_syx(ihex: IntelHex, byte_width: int = 32) -> bytearray:
+def convert_ihex_syx(source, byte_width: int = 32) -> bytearray:
+    ihex = IntelHex(source)
+    
     syx = bytearray()
 
     # HEADER
@@ -68,10 +70,11 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
         description='Convert Launchpad Pro  firmware from ihex to syx format')
-    parser.add_argument('source', help='ihex format file path')
-    parser.add_argument('destination', help='syx format file path')
+    parser.add_argument('source', type=argparse.FileType('r'),
+        help='ihex format file path')
+    parser.add_argument('destination', type=argparse.FileType('wb'),
+        help='syx format file path')
 
     args = parser.parse_args()
 
-    with open(args.destination, mode='wb') as file:
-        file.write(convert_ihex_syx(IntelHex(args.source)))
+    args.destination.write(convert_ihex_syx(args.source))
