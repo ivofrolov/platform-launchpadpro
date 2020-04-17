@@ -106,4 +106,12 @@ upload = env.VerboseAction(' '.join([
 
 AlwaysBuild(env.Alias('upload', target_syx, upload))
 
+AlwaysBuild(
+    env.Alias(
+        'restore',
+        join(
+            PLATFORM_DIR,
+            'resources/Launchpad Pro.syx'),
+        upload))
+
 Default(target_syx)
