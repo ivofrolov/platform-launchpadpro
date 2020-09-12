@@ -81,6 +81,8 @@ env.Append(
     )
 )
 
+# Target: Build
+
 if 'nobuild' in COMMAND_LINE_TARGETS:
     target_elf = join('$BUILD_DIR', '${PROGNAME}.elf')
     target_hex = join('$BUILD_DIR', '${PROGNAME}.hex')
@@ -91,6 +93,8 @@ else:
     target_syx = env.HexToSyx(join('$BUILD_DIR', '${PROGNAME}'), target_hex)
 
 AlwaysBuild(env.Alias('nobuild', target_syx))
+
+# Target: Upload
 
 env.Replace(
     UPLOAD_PORT='"Launchpad Pro"'
@@ -104,14 +108,24 @@ upload = env.VerboseAction(' '.join([
     '$SOURCE'
 ]), 'Uploading $SOURCE')
 
-AlwaysBuild(env.Alias('upload', target_syx, upload))
+env.AddPlatformTarget(
+    'upload',
+    target_syx,
+    upload,
+    'Upload',
+    'Send firmware to Launchpad Pro over MIDI'
+)
 
-AlwaysBuild(
-    env.Alias(
-        'restore',
-        join(
-            PLATFORM_DIR,
-            'resources/Launchpad Pro.syx'),
-        upload))
+# Target: Restore
+
+env.AddPlatformTarget(
+    'restore',
+    join(PLATFORM_DIR, 'resources/Launchpad Pro.syx'),
+    upload,
+    'Restore',
+    'Restore Launchpad Pro original firmware'
+)
+
+# Default Targets
 
 Default(target_syx)
