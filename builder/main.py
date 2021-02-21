@@ -45,7 +45,7 @@ env.Replace(
     ],
     PROGNAME='launchpad_pro',
     HEXTOSYX=join(PLATFORM_DIR, 'tools/hextosyx.py'),
-    SENDSYSEX=join(PLATFORM_DIR, 'tools/sendsysex.py')
+    SENDSYSEX=join(PLATFORM_DIR, 'tools/sendsysex.py'),
 )
 
 env.Append(
@@ -54,7 +54,7 @@ env.Append(
     ],
     CPPPATH=[
         join(PLATFORM_DIR, 'include')
-    ]
+    ],
 )
 
 env.Append(
@@ -77,8 +77,8 @@ env.Append(
                 '$TARGET'
             ]), 'Building $TARGET'),
             suffix='.syx'
-        )
-    )
+        ),
+    ),
 )
 
 # Target: Build
@@ -93,6 +93,24 @@ else:
     target_syx = env.HexToSyx(join('$BUILD_DIR', '${PROGNAME}'), target_hex)
 
 AlwaysBuild(env.Alias('nobuild', target_syx))
+
+# Target: Print binary size
+
+env.Replace(
+    SIZETOOL='arm-none-eabi-size',
+    SIZEPROGREGEXP=r"^(?:\.text|\.data|\.rodata|\.text.align|\.ARM.exidx)\s+(\d+).*",
+    SIZEDATAREGEXP=r"^(?:\.data|\.bss|\.noinit)\s+(\d+).*",
+    SIZECHECKCMD="$SIZETOOL -A -d $SOURCES",
+    SIZEPRINTCMD='$SIZETOOL -B -d $SOURCES',
+)
+
+target_size = env.Alias(
+    'size',
+    target_elf,
+    env.VerboseAction('$SIZEPRINTCMD', 'Calculating size $SOURCE'),
+)
+
+AlwaysBuild(target_size)
 
 # Target: Upload
 
@@ -113,7 +131,7 @@ env.AddPlatformTarget(
     target_syx,
     upload,
     'Upload',
-    'Send firmware to Launchpad Pro over MIDI'
+    'Send firmware to Launchpad Pro over MIDI',
 )
 
 # Target: Restore
@@ -123,9 +141,9 @@ env.AddPlatformTarget(
     join(PLATFORM_DIR, 'resources/Launchpad Pro.syx'),
     upload,
     'Restore',
-    'Restore Launchpad Pro original firmware'
+    'Restore Launchpad Pro original firmware',
 )
 
 # Default Targets
 
-Default(target_syx)
+Default([target_syx, target_size])
