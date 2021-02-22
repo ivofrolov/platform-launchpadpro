@@ -1,3 +1,4 @@
+import sys
 import time
 import rtmidi
 from rtmidi import midiconstants
@@ -18,6 +19,19 @@ class InvalidPortError(BaseUploadError):
     pass
 
 
+def over_progress_bar(iterable: list):
+    progress = ['#####25%', '#####50%', '#####75%', '####100%']
+    increment = len(iterable) // len(progress)
+
+    for idx, item in enumerate(iterable):
+        yield item
+
+        if (idx + 1) % increment == 0:
+            print(progress[idx // increment], end='', flush=True)
+
+    print()  # new line
+
+
 def parse_sysex(data: bytes):
     start = 0
     for index, byte in enumerate(data):
@@ -27,12 +41,14 @@ def parse_sysex(data: bytes):
             yield data[start : index + 1]
 
 
-def send_sysex(port: int, text: str):
+def send_sysex(port: int, data: bytes):
     midiout = rtmidi.MidiOut()
+    messages = list(parse_sysex(data))
 
     try:
         midiout.open_port(port=port)
-        for msg in parse_sysex(text):
+
+        for msg in over_progress_bar(messages):
             midiout.send_message(msg)
             time.sleep(MESSAGE_TIME_GAP)
     finally:
@@ -59,7 +75,6 @@ def find_port(spec: str) -> int:
 
 
 if __name__ == '__main__':
-    import sys
     import logging
     import argparse
 
@@ -80,8 +95,8 @@ if __name__ == '__main__':
 
     try:
         port = find_port(spec=args.port)
-        send_sysex(port=port, text=args.source.read())
-    except BaseUploadError as exc:
+        send_sysex(port=port, data=args.source.read())
+    except (BaseUploadError, KeyboardInterrupt) as exc:
         logging.error(exc)
         sys.exit(1)
 
