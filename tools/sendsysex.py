@@ -1,58 +1,88 @@
-from rtmidi import RtMidiError, InvalidPortError
-from rtmidi.midiutil import list_output_ports, open_midioutput
+import time
+import rtmidi
+from rtmidi import midiconstants
 
 
-def parse_sysex(data):
+MESSAGE_TIME_GAP = 0.001 * 10
+
+
+class BaseUploadError(Exception):
+    pass
+
+
+class NoAvailablePortsError(BaseUploadError):
+    pass
+
+
+class InvalidPortError(BaseUploadError):
+    pass
+
+
+def parse_sysex(data: bytes):
     start = 0
     for index, byte in enumerate(data):
-        if byte == 0xF0:
+        if byte == midiconstants.SYSTEM_EXCLUSIVE:
             start = index
-        elif byte == 0xF7:
-            yield data[start:index+1]
+        elif byte == midiconstants.END_OF_EXCLUSIVE:
+            yield data[start : index + 1]
+
+
+def send_sysex(port: int, text: str):
+    midiout = rtmidi.MidiOut()
+
+    try:
+        midiout.open_port(port=port)
+        for msg in parse_sysex(text):
+            midiout.send_message(msg)
+            time.sleep(MESSAGE_TIME_GAP)
+    finally:
+        midiout.close_port()
+
+
+def find_port(spec: str) -> int:
+    midiout = rtmidi.MidiOut()
+
+    ports = midiout.get_ports()
+    if len(ports) == 0:
+        raise NoAvailablePortsError('No MIDI output ports found')
+
+    for port, name in enumerate(ports):
+        if spec in name:
+            break
+    else:
+        available_ports = ', '.join([f'"{name}"' for name in ports])
+        raise InvalidPortError(
+            f'Invalid MIDI output port (use one of these available: {available_ports})'
+        )
+
+    return port
 
 
 if __name__ == '__main__':
     import sys
-    import time
     import logging
     import argparse
 
-    logging.basicConfig(format='{levelname}: {message}', style='{', level=logging.INFO)
+    logging.basicConfig(format='%(message)s', level=logging.INFO)
 
     parser = argparse.ArgumentParser(
-        description='Send MIDI System Exclusive file to given device')
-    parser.add_argument('source', type=argparse.FileType('rb', 0), nargs='?',
-        help='syx format file path')
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('-p', '--port',
-        help='MIDI output port name')
-    group.add_argument('-l', '--list', action='store_true',
-        help='list available MIDI ports')
+        description='Send MIDI System Exclusive file to given device'
+    )
+    parser.add_argument(
+        'source',
+        type=argparse.FileType('rb', 0),
+        nargs='?',
+        help='syx format file path',
+    )
+    parser.add_argument('-p', '--port', help='MIDI output port name')
 
     args = parser.parse_args()
 
-    if args.list:
-        try:
-            list_output_ports()
-        except RtMidiError as e:
-            logging.error(e)
-            sys.exit(1)
-        sys.exit(0)
-
     try:
-        midiout, _ = open_midioutput(port=args.port, interactive=False)
-    except InvalidPortError as e:
-        logging.error('Invalid MIDI name or number (use -l option to list available ports)')
-        sys.exit(2)
-    except RtMidiError as e:
-        logging.error(e)
+        port = find_port(spec=args.port)
+        send_sysex(port=port, text=args.source.read())
+    except BaseUploadError as exc:
+        logging.error(exc)
         sys.exit(1)
-
-    try:
-        for msg in parse_sysex(args.source.read()):
-            midiout.send_message(msg)
-            time.sleep(0.001 * 10)
-    finally:
-        midiout.close_port()
 
     sys.exit(0)
