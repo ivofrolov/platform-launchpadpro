@@ -1,10 +1,15 @@
 import sys
 import time
+from typing import Iterator, Sequence, TypeVar
+
 import rtmidi
 from rtmidi import midiconstants
 
 
 MESSAGE_TIME_GAP = 0.001 * 10
+
+
+T = TypeVar('T')
 
 
 class BaseUploadError(Exception):
@@ -19,11 +24,11 @@ class InvalidPortError(BaseUploadError):
     pass
 
 
-def over_progress_bar(iterable: list):
+def iter_with_progress_bar(sequence: Sequence[T]) -> Iterator[T]:
     progress = ['#####25%', '#####50%', '#####75%', '####100%']
-    increment = len(iterable) // len(progress)
+    increment = len(sequence) // len(progress)
 
-    for idx, item in enumerate(iterable):
+    for idx, item in enumerate(sequence):
         yield item
 
         if (idx + 1) % increment == 0:
@@ -32,7 +37,7 @@ def over_progress_bar(iterable: list):
     print()  # new line
 
 
-def parse_sysex(data: bytes):
+def parse_sysex(data: bytes) -> Iterator[bytes]:
     start = 0
     for index, byte in enumerate(data):
         if byte == midiconstants.SYSTEM_EXCLUSIVE:
@@ -48,7 +53,7 @@ def send_sysex(port: int, data: bytes):
     try:
         midiout.open_port(port=port)
 
-        for msg in over_progress_bar(messages):
+        for msg in iter_with_progress_bar(messages):
             midiout.send_message(msg)
             time.sleep(MESSAGE_TIME_GAP)
     finally:
