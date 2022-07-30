@@ -147,3 +147,17 @@ env.AddPlatformTarget(
 # Default Targets
 
 Default([target_syx, target_size])
+
+# In Platformio 6.0.0 they dropped support for the `pythonPackages`
+# field in `platform.json` manifest in favor of this feature
+# https://docs.platformio.org/en/latest/scripting/examples/extra_python_packages.html
+# So we should install required dependencies "manually".
+try:
+    import intelhex
+except ImportError:
+    env.Execute('$PYTHONEXE -m pip install intelhex==2.3.0')
+
+try:
+    import rtmidi
+except ImportError:
+    env.Execute('$PYTHONEXE -m pip install python-rtmidi==1.4.9')
