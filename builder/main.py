@@ -7,9 +7,32 @@ env = DefaultEnvironment()
 PLATFORM_DIR = env.PioPlatform().get_dir()
 
 env.Replace(
-    CC='arm-none-eabi-gcc',
-    OBJCOPY='arm-none-eabi-objcopy',
+    AR="arm-none-eabi-gcc-ar",
+    AS="arm-none-eabi-as",
+    CC="arm-none-eabi-gcc",
+    CXX="arm-none-eabi-g++",
+    GDB="arm-none-eabi-gdb",
+    OBJCOPY="arm-none-eabi-objcopy",
+    RANLIB="arm-none-eabi-gcc-ranlib",
+    SIZETOOL="arm-none-eabi-size",
+
+    ARFLAGS=["rc"],
+
     LDSCRIPT_PATH=join(PLATFORM_DIR, 'ld/stm32_flash.ld'),
+
+    PROGNAME='launchpad_pro',
+    PROGSUFFIX=".elf",
+
+    SIZEPROGREGEXP=r"^(?:\.text|\.data|\.rodata|\.text.align|\.ARM.exidx)\s+(\d+).*",
+    SIZEDATAREGEXP=r"^(?:\.data|\.bss|\.noinit)\s+(\d+).*",
+    SIZECHECKCMD="$SIZETOOL -A -d $SOURCES",
+    SIZEPRINTCMD='$SIZETOOL -B -d $SOURCES',
+
+    HEXTOSYX=join(PLATFORM_DIR, 'tools/hextosyx.py'),
+    SENDSYSEX=join(PLATFORM_DIR, 'tools/sendsysex.py'),
+)
+
+env.Append(
     CCFLAGS=[
         '-Os',
         '-Wall',
@@ -43,12 +66,6 @@ env.Replace(
         '-nostartfiles',
         '-Wl,--gc-sections'
     ],
-    PROGNAME='launchpad_pro',
-    HEXTOSYX=join(PLATFORM_DIR, 'tools/hextosyx.py'),
-    SENDSYSEX=join(PLATFORM_DIR, 'tools/sendsysex.py'),
-)
-
-env.Append(
     LIBS=[
         File(join(PLATFORM_DIR, 'lib/launchpad_pro.a'))
     ],
@@ -96,14 +113,6 @@ AlwaysBuild(env.Alias('nobuild', target_syx))
 
 # Target: Print binary size
 
-env.Replace(
-    SIZETOOL='arm-none-eabi-size',
-    SIZEPROGREGEXP=r"^(?:\.text|\.data|\.rodata|\.text.align|\.ARM.exidx)\s+(\d+).*",
-    SIZEDATAREGEXP=r"^(?:\.data|\.bss|\.noinit)\s+(\d+).*",
-    SIZECHECKCMD="$SIZETOOL -A -d $SOURCES",
-    SIZEPRINTCMD='$SIZETOOL -B -d $SOURCES',
-)
-
 target_size = env.Alias(
     'size',
     target_elf,
@@ -148,10 +157,8 @@ env.AddPlatformTarget(
 
 Default([target_syx, target_size])
 
-# In Platformio 6.0.0 they dropped support for the `pythonPackages`
-# field in `platform.json` manifest in favor of this feature
-# https://docs.platformio.org/en/latest/scripting/examples/extra_python_packages.html
-# So we should install required dependencies "manually".
+# Requirements
+
 try:
     import intelhex
 except ImportError:

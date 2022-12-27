@@ -22,9 +22,5 @@
             "owner": "platformio",
             "version": "~1.90301.0"
         }
-    },
-    "pythonPackages": {
-        "intelhex": "2.3.0",
-        "python-rtmidi": "1.4.9"
     }
 }
