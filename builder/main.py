@@ -88,7 +88,7 @@ env.Append(
         ),
         HexToSyx=Builder(
             action=env.VerboseAction(' '.join([
-                'python3',
+                '$PYTHONEXE',
                 '$HEXTOSYX',
                 '$SOURCES',
                 '$TARGET'
@@ -128,7 +128,7 @@ env.Replace(
 )
 
 upload = env.VerboseAction(' '.join([
-    'python3',
+    '$PYTHONEXE',
     '$SENDSYSEX',
     '-p',
     '$UPLOAD_PORT',
@@ -167,4 +167,4 @@ except ImportError:
 try:
     import rtmidi
 except ImportError:
-    env.Execute('$PYTHONEXE -m pip install python-rtmidi==1.4.9')
+    env.Execute('$PYTHONEXE -m pip install python-rtmidi==1.5.5')
