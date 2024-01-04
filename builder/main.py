@@ -162,9 +162,9 @@ Default([target_syx, target_size])
 try:
     import intelhex
 except ImportError:
-    env.Execute('$PYTHONEXE -m pip install intelhex==2.3.0')
+    env.Execute('$PYTHONEXE -m pip install intelhex~=2.3.0')
 
 try:
     import rtmidi
 except ImportError:
-    env.Execute('$PYTHONEXE -m pip install python-rtmidi==1.5.5')
+    env.Execute('$PYTHONEXE -m pip install python-rtmidi~=1.5.5')
